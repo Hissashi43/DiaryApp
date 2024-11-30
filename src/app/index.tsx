@@ -1,12 +1,13 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, Image, StyleSheet } from 'react-native'
 
 const Index = (): JSX.Element => {
   return (
     <View style={styles.container}>
-      <View>
-        <View>
-          <Text>Diary App</Text>
-          <Text>ログアウト</Text>
+
+      <View style={styles.header}>
+        <View style={styles.headerInner}>
+          <Text style={styles.headerTitle}>Diary App</Text>
+          <Text style={styles.headerRight}>ログアウト</Text>
         </View>
       </View>
 
@@ -18,8 +19,14 @@ const Index = (): JSX.Element => {
         <Text>10月24日（金）</Text>
       </View>
 
-      <View>
-        <Text>Picture</Text>
+      <View style={styles.imageContainer}>
+        <Image
+          style={{
+            width: 368,
+            height: 223
+          }}
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          source={require('../../assets/example-image.png')}/>
       </View>
 
       <View>
@@ -34,8 +41,33 @@ const Index = (): JSX.Element => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#ffffff'
+  },
+  header: {
+    backgroundColor: '#55E42E',
+    height: 104,
+    justifyContent: 'flex-end'
+  },
+  headerInner: {
+    alignItems: 'center'
+  },
+  headerRight: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+    color: '#ffffff',
+    opacity: 0.7
+  },
+  headerTitle: {
+    marginBottom: 8,
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 24,
+    lineHeight: 32
+  },
+  imageContainer: {
     alignItems: 'center'
   }
 })
+
 export default Index
