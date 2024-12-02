@@ -2,14 +2,19 @@ import { View, Text, StyleSheet } from 'react-native'
 
 interface Props {
   children: string
+  backgroundColor?: string
 }
 
 const RectangularButton = (props: Props):JSX.Element => {
-  const { children } = props
+  const { children, backgroundColor } = props
   return (
-    <View style={styles.RectangularButton}>
-    <Text style={styles.RectangularButtonLabel}>{children}</Text>
-</View>
+    <View style={[
+      styles.RectangularButton,
+      backgroundColor ? { backgroundColor } : {}
+      ]}
+    >
+      <Text style={styles.RectangularButtonLabel}>{children}</Text>
+    </View>
   )
 }
 
