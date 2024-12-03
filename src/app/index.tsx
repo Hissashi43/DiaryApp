@@ -1,7 +1,7 @@
 import { Redirect } from "expo-router"
 
 const Index = (): JSX.Element => {
-  return <Redirect href='diary/calendar' />
+  return <Redirect href='diary/diary' />
 }
 
 export default Index
