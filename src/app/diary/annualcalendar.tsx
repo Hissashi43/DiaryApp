@@ -5,7 +5,7 @@ import Header from '../../components/Header'
 import RectangularButton from '../../components/RectangularButton'
 /*import CircleButton from '../../components/CircleButton'*/
 
-const annualCurrender = (): JSX.Element => {
+const annualCalendar = (): JSX.Element => {
   return (
     <View style={styles.container}>
 
@@ -156,4 +156,4 @@ const styles = StyleSheet.create({
  }
 })
 
-export default annualCurrender
+export default annualCalendar
