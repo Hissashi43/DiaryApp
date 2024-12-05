@@ -1,4 +1,6 @@
-import { View, Text, StyleSheet, type ViewStyle } from 'react-native'
+import {
+  Text, StyleSheet, TouchableOpacity,
+  type ViewStyle } from 'react-native'
 
 interface Props {
   children: JSX.Element
@@ -8,9 +10,9 @@ interface Props {
 const CircleButton = (props: Props):JSX.Element => {
   const { children, style } = props
   return (
-    <View style={[styles.circleButton, style]}>
-    <Text style={styles.circleButtonLabel}>{children}</Text>
-</View>
+    <TouchableOpacity style={[styles.circleButton, style]}>
+      <Text style={styles.circleButtonLabel}>{children}</Text>
+    </TouchableOpacity>
   )
 }
 
@@ -22,7 +24,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#55E42E',
     position: 'absolute',
     right: 24,
-    bottom: 24,
+    bottom: 48,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000000',

@@ -6,7 +6,7 @@ import { Entypo } from '@expo/vector-icons'
 import Header from '../../components/Header'
 import CircleButton from '../../components/CircleButton'
 
-const Edit = (): JSX.Element => {
+const Create = (): JSX.Element => {
   return (
   <KeyboardAvoidingView style={styles.container}>
     <View>
@@ -32,7 +32,7 @@ const Edit = (): JSX.Element => {
     </View>
 
     <View style={styles.diaryText}>
-        <TextInput multiline style={styles.diaryTextInput} value={'日記\nです'}/>
+        <TextInput multiline style={styles.diaryTextInput} value={''}/>
     </View>
 
     <CircleButton>
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     height: 51,
     width: 368,
     marginBottom: 8,
-    marginTop: 12,
+    marginTop: 8,
     marginLeft: 17,
     marginRight: 17,
     alignItems: 'center'
@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top'
   }
 })
-export default Edit
+export default Create

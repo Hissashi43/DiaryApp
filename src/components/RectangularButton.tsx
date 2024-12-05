@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { TouchableOpacity, Text, StyleSheet } from 'react-native'
 
 interface Props {
   children: string
@@ -8,13 +8,13 @@ interface Props {
 const RectangularButton = (props: Props):JSX.Element => {
   const { children, backgroundColor } = props
   return (
-    <View style={[
+    <TouchableOpacity style={[
       styles.RectangularButton,
       backgroundColor ? { backgroundColor } : {}
       ]}
     >
       <Text style={styles.RectangularButtonLabel}>{children}</Text>
-    </View>
+    </TouchableOpacity>
   )
 }
 
