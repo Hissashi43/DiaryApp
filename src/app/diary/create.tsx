@@ -3,15 +3,11 @@ import {
  } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 
-import Header from '../../components/Header'
 import CircleButton from '../../components/CircleButton'
 
 const Create = (): JSX.Element => {
   return (
   <KeyboardAvoidingView style={styles.container}>
-    <View>
-      <Header />
-    </View>
 
     <View style={styles.monthTitle}>
       <Text style={styles.monthText}>10月</Text>

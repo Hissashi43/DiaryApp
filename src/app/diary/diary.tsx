@@ -1,14 +1,18 @@
 import { View, Text, Image, StyleSheet } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
+import { router } from 'expo-router'
 
-import Header from '../../components/Header'
 import CircleButton from '../../components/CircleButton'
+//import { useSearchParams } from 'expo-router/build/hooks'
+
+const handlePress = (): void => {
+  router.push('/diary/edit')
+}
 
 const Diary = (): JSX.Element => {
   return (
     <View style={styles.container}>
 
-      <Header />
 
       <View style={styles.monthTitle}>
         <Text style={styles.monthText}>10月</Text>
@@ -32,7 +36,7 @@ const Diary = (): JSX.Element => {
         <Text style={styles.diaryContentText}>山梨県の富士五胡の一つ、河口湖から富士山を見た。ちょうど紅葉真っ只中でなかなかのいい景色が取れた。なおこの場所はかなり有名らしく、写真を撮ろうと多くの人がごった返しており人が映らないような場所とタイミングを見極めるのにかなり苦労した</Text>
       </View>
 
-      <CircleButton>
+      <CircleButton onPress={handlePress}>
         <Entypo name='pencil' size={28}/>
       </CircleButton>
 

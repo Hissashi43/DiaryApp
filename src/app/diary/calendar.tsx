@@ -1,15 +1,30 @@
 import React from 'react'
-import { View, Image, SafeAreaView, StyleSheet } from 'react-native'
+import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
+//import { useRouter } from 'expo-router'
 
-import Header from '../../components/Header'
 
-const monthlyCalendar = (): JSX.Element => {
+
+//interface DateObject {
+  //dateString: string; // "YYYY-MM-DD" フォーマット
+  //day: number;        // 日付
+  //month: number;      // 月
+  //year: number;       // 年
+  //timestamp: number;  // Unixタイムスタンプ（省略可能）
+//}
+interface Props {
+  date: string
+  state?: string
+}
+const monthlyCalendar = (props: Props):JSX.Element => {
+  //const router = useRouter()
+  const { date, state } = props
+  //const handleDayPress = (day: DateObject) => {
+    //router.push('/diary?date=${day.dateString}')
+  //}
   return (
 
     <View style={styles.container}>
-
-      <Header />
 
       <View style={styles.imageContainer}>
         <Image
@@ -23,7 +38,11 @@ const monthlyCalendar = (): JSX.Element => {
 
       <SafeAreaView style={styles.calendarContainer}>
         <View style={styles.centeredCalendar}>
-          <Calendar style={styles.mCalendar}
+          <Calendar
+            style={styles.mCalendar}
+            dayComponent={({date, state}) => {
+              return <View><Text style={{color: 'red'}}>{date.day}</Text></View>}}
+            //onPress={handleDayPress}
           />
         </View>
       </SafeAreaView>

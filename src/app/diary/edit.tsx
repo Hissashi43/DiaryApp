@@ -3,15 +3,11 @@ import {
  } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 
-import Header from '../../components/Header'
 import CircleButton from '../../components/CircleButton'
 
 const Edit = (): JSX.Element => {
   return (
   <KeyboardAvoidingView style={styles.container}>
-    <View>
-      <Header />
-    </View>
 
     <View style={styles.monthTitle}>
       <Text style={styles.monthText}>10月</Text>
@@ -58,7 +54,7 @@ const styles = StyleSheet.create({
     height: 51,
     width: 368,
     marginBottom: 8,
-    marginTop: 12,
+    marginTop: 8,
     marginLeft: 17,
     marginRight: 17,
     alignItems: 'center'
