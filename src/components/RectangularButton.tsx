@@ -2,15 +2,18 @@ import { TouchableOpacity, Text, StyleSheet } from 'react-native'
 
 interface Props {
   children: string
-  backgroundColor?: string
+  backgroundColor?: string,
+  onPress?: () => void
 }
 
 const RectangularButton = (props: Props):JSX.Element => {
-  const { children, backgroundColor } = props
+  const { children, backgroundColor, onPress } = props
   return (
-    <TouchableOpacity style={[
-      styles.RectangularButton,
-      backgroundColor ? { backgroundColor } : {}
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.RectangularButton,
+        backgroundColor ? { backgroundColor } : {}
       ]}
     >
       <Text style={styles.RectangularButtonLabel}>{children}</Text>
