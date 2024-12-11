@@ -1,8 +1,10 @@
 import { TouchableOpacity, Text, StyleSheet } from "react-native"
+import { router } from "expo-router"
+
 
 const LogOutButton = (): JSX.Element => {
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={(): void => {router.replace('auth/log_in')}}>
       <Text style={styles.logOutText}>log out</Text>
     </TouchableOpacity>
   )

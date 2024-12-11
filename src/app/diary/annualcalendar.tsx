@@ -10,11 +10,12 @@ const handlePress = (): void => {
   router.push('/diary/calendar')
 }
 
+
 const annualCalendar = (): JSX.Element => {
   const navigation = useNavigation()
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => { return <LogOutButton/> }
+      headerRight: () => { return <LogOutButton /> }
     })
   }, [])
 
