@@ -1,9 +1,26 @@
 import React from 'react'
 import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
-//import { useRouter } from 'expo-router'
+import { router } from 'expo-router'
+import { doc, getDoc } from 'firebase/firestore'
+import { db, auth } from '../../config'
 
+const handleDayPress = async (day: { dateString: string }) => {
+  if (!auth.currentUser) {
+    console.log('User us not logged in')
+    return
+  }
+  const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${day.dateString}`)
+  const diarySnap = await getDoc(diaryRef)
 
+  if (diarySnap.exists()) {
+    console.log('Navigating to diary:', day.dateString)
+    router.push(`/diary/diary?date=${day.dateString}`) // 修正: 動的なルートを指定
+  } else {
+    console.log('Navigating to create:', day.dateString)
+    router.push(`/diary/create?date=${day.dateString}`)
+  }
+}
 
 //interface DateObject {
   //dateString: string; // "YYYY-MM-DD" フォーマット
@@ -12,13 +29,13 @@ import { Calendar } from 'react-native-calendars'
   //year: number;       // 年
   //timestamp: number;  // Unixタイムスタンプ（省略可能）
 //}
-interface Props {
+/*interface Props {
   date: string
   state?: string
-}
-const monthlyCalendar = (props: Props):JSX.Element => {
+}*/
+const monthlyCalendar = ():JSX.Element => {
   //const router = useRouter()
-  const { date, state } = props
+  //const { date, state } = props
   //const handleDayPress = (day: DateObject) => {
     //router.push('/diary?date=${day.dateString}')
   //}
@@ -40,9 +57,7 @@ const monthlyCalendar = (props: Props):JSX.Element => {
         <View style={styles.centeredCalendar}>
           <Calendar
             style={styles.mCalendar}
-            dayComponent={({date, state}) => {
-              return <View><Text style={{color: 'red'}}>{date.day}</Text></View>}}
-            //onPress={handleDayPress}
+            onDayPress={handleDayPress}
           />
         </View>
       </SafeAreaView>

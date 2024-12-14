@@ -1,25 +1,75 @@
-import { View, Text, Image, StyleSheet } from 'react-native'
+import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import { router } from 'expo-router'
+import { useSearchParams } from 'expo-router/build/hooks'
+import { doc, getDoc } from 'firebase/firestore'
+import { db, auth } from '../../config'
+import { useEffect, useState } from 'react'
 
 import CircleButton from '../../components/CircleButton'
-//import { useSearchParams } from 'expo-router/build/hooks'
 
 const handlePress = (): void => {
   router.push('/diary/edit')
 }
 
 const Diary = (): JSX.Element => {
+  const { date } = useSearchParams()
+  const [diaryData, setDiaryData] = useState<{ bodyText: string; updatedAt: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDiaryData = async () => {
+      if (!auth.currentUser || !date) {
+        setDiaryData(null)
+        setLoading(false)
+        return
+      }
+
+      try {
+        const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${date}`)
+        const diarySnap = await getDoc(diaryRef)
+
+        if (diarySnap.exists()) {
+          setDiaryData(diarySnap.data() as { bodyText: string; updatedAt: string })
+        } else {
+          router.push('diary/create')// 日記が存在しない場合
+        }
+      } catch (error) {
+        console.error('Error fetching diary:', error)
+        setDiaryData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDiaryData()
+  }, [date])
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#BF5D5D" />
+        <Text>読み込み中...</Text>
+      </View>
+    )
+  }
+
+
+  const formattedDate = date
+    ? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+    : 'unknown date'
   return (
     <View style={styles.container}>
 
 
       <View style={styles.monthTitle}>
-        <Text style={styles.monthText}>10月</Text>
+        <Text style={styles.monthText}>
+          {date ? formattedDate.split('年')[1] : 'unknown date'}
+        </Text>
       </View>
 
       <View style={styles.date}>
-        <Text style={styles.dateText}>10月24日（金）</Text>
+        <Text style={styles.dateText}>{formattedDate}</Text>
       </View>
 
       <View style={styles.imageContainer}>
@@ -33,7 +83,9 @@ const Diary = (): JSX.Element => {
       </View>
 
       <View style={styles.diaryContent}>
-        <Text style={styles.diaryContentText}>山梨県の富士五胡の一つ、河口湖から富士山を見た。ちょうど紅葉真っ只中でなかなかのいい景色が取れた。なおこの場所はかなり有名らしく、写真を撮ろうと多くの人がごった返しており人が映らないような場所とタイミングを見極めるのにかなり苦労した</Text>
+        <Text style={styles.diaryContentText}>
+          {date ? `${formattedDate}の日記がここに表示されます` : '選択された日記はありません'}
+        </Text>
       </View>
 
       <CircleButton onPress={handlePress}>
@@ -51,7 +103,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#ffffff'
   },
-
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
   imageContainer: {
     alignItems: 'center'
   },
