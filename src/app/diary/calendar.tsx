@@ -25,9 +25,9 @@ const handleDayPress = async (day: { dateString: string }) => {
 
 
 const monthlyCalendar = ():JSX.Element => {
-  const [currentMonth, setCurrentMonth] = useState('')
   const searchParams = useSearchParams()
   const month = searchParams.get('month')
+  const [currentMonth, setCurrentMonth] = useState(month || new Date().getMonth() + 1)
   const monthColors: { [key: string]: string } = {
     '1': '#F65E5E', // 1月: 明るい赤
     '2': '#5CA1DD', // 2月: 明るい青

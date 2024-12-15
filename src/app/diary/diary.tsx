@@ -13,7 +13,9 @@ const handlePress = (): void => {
 }
 
 const Diary = (): JSX.Element => {
-  const { date } = useSearchParams()
+  const searchParams = useSearchParams()
+  const date = searchParams.get('date')
+  const [year, month, day] = date.split('-')
   const [diaryData, setDiaryData] = useState<{ bodyText: string; updatedAt: string } | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -26,7 +28,7 @@ const Diary = (): JSX.Element => {
       }
 
       try {
-        const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${date}`)
+        const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${date}/${day}`)
         const diarySnap = await getDoc(diaryRef)
 
         if (diarySnap.exists()) {
