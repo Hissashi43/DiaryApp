@@ -29,17 +29,18 @@ const Create = (): JSX.Element => {
   const searchParams = useSearchParams()
   const date = searchParams.get('date')
   const [year, month, day] = date.split('-')
+  const dateDirectory = date?.replace('-', '').replace('-', '')
 
   const handlePress = (bodyText: string): void => {
     if (auth.currentUser === null) { return }
 
-    addDoc(collection(db, `users/${auth.currentUser.uid}/diary/${date}/${day}`), {
+    addDoc(collection(db, `users/${auth.currentUser.uid}/diary/${dateDirectory}/diarytext`), {
       bodyText, // key doesn't need value if its name is same as key name
       updatedAt: Timestamp.fromDate(new Date())
     })
       .then((docRef) => {
         console.log('success', date, docRef.id)
-        router.replace(`diary/diary?date=${date}`)
+        router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
       })
       .catch((error) => {
         console.log(error)

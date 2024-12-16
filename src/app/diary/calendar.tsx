@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { router } from 'expo-router'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../../config'
 import { useSearchParams } from 'expo-router/build/hooks'
 
@@ -11,12 +11,15 @@ const handleDayPress = async (day: { dateString: string }) => {
     console.log('User us not logged in')
     return
   }
-  const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${day.dateString}`)
-  const diarySnap = await getDoc(diaryRef)
+  const dateDirectory = day.dateString.replace('-', '').replace('-', '')
+  const diaryRef = collection(db, `users/${auth.currentUser.uid}/diary/${dateDirectory}/diarytext`)
+  const querySnapshot = await getDocs(diaryRef)
 
-  if (diarySnap.exists()) {
+  if (!querySnapshot.empty) {
+    const doc = querySnapshot.docs[0]
+    const docId = doc.id
     console.log('Navigating to diary:', day.dateString)
-    router.push(`/diary/diary?date=${day.dateString}`) // 修正: 動的なルートを指定
+    router.push(`/diary/diary?date=${day.dateString}&id=${docId}`) // 修正: 動的なルートを指定
   } else {
     console.log('Navigating to create:', day.dateString)
     router.push(`/diary/create?date=${day.dateString}`)

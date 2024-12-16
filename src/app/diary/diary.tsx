@@ -15,25 +15,33 @@ const handlePress = (): void => {
 const Diary = (): JSX.Element => {
   const searchParams = useSearchParams()
   const date = searchParams.get('date')
+  const id = searchParams.get('id')
   const [year, month, day] = date.split('-')
+  const dateDirectory = date?.replace('-', '').replace('-', '')
   const [diaryData, setDiaryData] = useState<{ bodyText: string; updatedAt: string } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchDiaryData = async () => {
-      if (!auth.currentUser || !date) {
+      console.log('auth.currentUser:', auth.currentUser)
+      console.log('date:', date)
+      console.log('id:', id)
+      if (!auth.currentUser || !date || !id) {
+        console.log('no data')
         setDiaryData(null)
         setLoading(false)
         return
       }
 
       try {
-        const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${date}/${day}`)
+        const diaryRef = doc(db, `users/${auth.currentUser.uid}/diary/${dateDirectory}/diarytext/${id}`)
         const diarySnap = await getDoc(diaryRef)
 
         if (diarySnap.exists()) {
+          console.log('doc found')
           setDiaryData(diarySnap.data() as { bodyText: string; updatedAt: string })
         } else {
+          console.log('doc not fount')
           router.push('diary/create')// 日記が存在しない場合
         }
       } catch (error) {
@@ -45,7 +53,7 @@ const Diary = (): JSX.Element => {
     }
 
     fetchDiaryData()
-  }, [date])
+  }, [date, id])
 
   if (loading) {
     return (
@@ -66,7 +74,7 @@ const Diary = (): JSX.Element => {
 
       <View style={styles.monthTitle}>
         <Text style={styles.monthText}>
-          {date ? formattedDate.split('年')[1] : 'unknown date'}
+          {date ? `${month}月` : 'unknown date'}
         </Text>
       </View>
 
@@ -86,7 +94,7 @@ const Diary = (): JSX.Element => {
 
       <View style={styles.diaryContent}>
         <Text style={styles.diaryContentText}>
-          {date ? `${formattedDate}の日記がここに表示されます` : '選択された日記はありません'}
+          { diaryData? `${diaryData.bodyText}` : '選択された日記はありません'}
         </Text>
       </View>
 
