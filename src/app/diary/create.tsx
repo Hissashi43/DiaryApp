@@ -1,11 +1,12 @@
 import {
-  View, Text, TextInput, Image, StyleSheet, KeyboardAvoidingView
+  View, Text, TextInput, Image, Button, StyleSheet, KeyboardAvoidingView
  } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import { collection, addDoc, Timestamp } from 'firebase/firestore'
 import { useState } from 'react'
 import { router } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
+import * as ImagePicker from 'expo-image-picker'
 
 import CircleButton from '../../components/CircleButton'
 import { db, auth } from '../../config'
@@ -30,6 +31,40 @@ const Create = (): JSX.Element => {
   const date = searchParams.get('date')
   const [year, month, day] = date.split('-')
   const dateDirectory = date?.replace('-', '').replace('-', '')
+  const monthColors: { [key: string]: string } = {
+    '01': '#F65E5E', // 1月: 明るい赤
+    '02': '#5CA1DD', // 2月: 明るい青
+    '03': '#F893E2', // 3月: 明るいピンク
+    '04': '#64DA51', // 4月: 明るい緑
+    '05': '#67C09F', // 5月: 明るいシアン
+    '06': '#B47BDA', // 6月: 明るい紫
+    '07': '#49D1E1', // 7月: 明るい空色
+    '08': '#E58027', // 8月: 明るいオレンジ
+    '09': '#3DC02E', // 9月: 明るいライム
+    '10': '#E1C84A', // 10月: 明るい黄色
+    '11': '#BF5D5D', // 11月: 明るいローズ
+    '12': '#4F69BF' // 12月: 明るい青紫
+  }
+  const currentBackgroundColor = monthColors[month] || '#000000'
+  const [image, setImage] = useState<string | null>(null)
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (status !== 'granted') {
+      alert('写真ライブラリへのアクセスが拒否されました')
+      return
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 2
+    })
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri)
+    }
+  }
 
   const handlePress = (bodyText: string): void => {
     if (auth.currentUser === null) { return }
@@ -53,7 +88,7 @@ const Create = (): JSX.Element => {
   return (
   <KeyboardAvoidingView style={styles.container}>
 
-    <View style={styles.monthTitle}>
+    <View style={[styles.monthTitle, { backgroundColor: currentBackgroundColor }]}>
       <Text style={styles.monthText}>{month}月</Text>
     </View>
 
@@ -62,13 +97,14 @@ const Create = (): JSX.Element => {
     </View>
 
     <View style={styles.imageContainer}>
-      <Image
+      <Button title="画像を選択する" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={{ width: 360, height: 240 }} />/* <Image
         style={{
         width: 368,
         height: 223
         }}
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      source={require('../../../assets/example-image.png')}/>
+      source={require('../../../assets/example-image.png')}/> */}
     </View>
 
     <View style={styles.diaryText}>
@@ -98,7 +134,10 @@ const styles = StyleSheet.create({
 
   imageContainer: {
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 16,
+    width: 368,
+    height: 223,
+    backgroundColor: '#D9D3D3'
   },
   monthTitle: {
     backgroundColor: '#BF5D5D',
@@ -126,9 +165,10 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   diaryText: {
-    borderWidth: 1,
+    backgroundColor: '#FAF6F6',
     marginRight: 17,
-    marginLeft: 17
+    marginLeft: 17,
+    height: 320
   },
   diaryTextInput: {
     fontSize: 18,
