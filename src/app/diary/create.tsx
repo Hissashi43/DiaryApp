@@ -48,21 +48,30 @@ const Create = (): JSX.Element => {
   const currentBackgroundColor = monthColors[month] || '#000000'
   const [image, setImage] = useState<string | null>(null)
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (status !== 'granted') {
-      alert('写真ライブラリへのアクセスが拒否されました')
-      return
-    }
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      console.log('Permission result:', permissionResult)
+      if (!permissionResult.granted) {
+        alert('画像選択のためにカメラロールへのアクセス許可が必要です')
+        return
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 2
-    })
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 1
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
+      console.log('Image picker result:', result)
+
+      if (!result.canceled) {
+        console.log('Selected image URI:', result.assets[0].uri)
+        setImage(result.assets[0].uri)
+      } else {
+        console.log('Image picker was canceled')
+      }
+    } catch (error) {
+      console.error('Error picking image:', error)
     }
   }
 
@@ -97,14 +106,12 @@ const Create = (): JSX.Element => {
     </View>
 
     <View style={styles.imageContainer}>
-      <Button title="画像を選択する" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={{ width: 360, height: 240 }} />/* <Image
-        style={{
-        width: 368,
-        height: 223
-        }}
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      source={require('../../../assets/example-image.png')}/> */}
+      {/* 画像が選択されていない場合のみボタンを表示 */}
+      {!image && <Button title="画像を選択する" onPress={pickImage} />}
+
+      {/* 画像が選択された場合は画像を表示 */}
+      {image && <Image source={{ uri: image }} style={{ width: 360, height: 240 }} />}
+
     </View>
 
     <View style={styles.diaryText}>
@@ -129,6 +136,7 @@ const Create = (): JSX.Element => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: 'center',
     backgroundColor: '#ffffff'
   },
 
@@ -136,8 +144,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     width: 368,
-    height: 223,
-    backgroundColor: '#D9D3D3'
+    height: 223
   },
   monthTitle: {
     backgroundColor: '#BF5D5D',
