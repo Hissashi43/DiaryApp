@@ -1,5 +1,6 @@
 import {
-  View, Text, TextInput, Image, Button, StyleSheet, KeyboardAvoidingView
+  View, Text, TextInput, Image, Button, StyleSheet, KeyboardAvoidingView,
+  TouchableOpacity
  } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import { collection, addDoc, Timestamp } from 'firebase/firestore'
@@ -60,15 +61,15 @@ const Create = (): JSX.Element => {
         mediaTypes: ['images'],
         allowsEditing: true,
         quality: 1
-      });
+      })
 
       console.log('Image picker result:', result)
 
       if (!result.canceled) {
-        console.log('Selected image URI:', result.assets[0].uri)
+        //console.log('Selected image URI:', result.assets[0].uri)
         setImage(result.assets[0].uri)
       } else {
-        console.log('Image picker was canceled')
+        //console.log('Image picker was canceled')
       }
     } catch (error) {
       console.error('Error picking image:', error)
@@ -90,6 +91,10 @@ const Create = (): JSX.Element => {
         console.log(error)
       })
   }
+
+  const removeImage = () => {
+    setImage(null)
+  }
   //const formattedDate = date
   //? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
   //: '日付不明'
@@ -101,17 +106,25 @@ const Create = (): JSX.Element => {
       <Text style={styles.monthText}>{month}月</Text>
     </View>
 
-    <View style={styles.date}>
-      <Text style={styles.dateText}>{year}年{month}月{day}日</Text>
-    </View>
-
     <View style={styles.imageContainer}>
       {/* 画像が選択されていない場合のみボタンを表示 */}
-      {!image && <Button title="画像を選択する" onPress={pickImage} />}
+      {!image && (
+      <Button title="画像を選択する" onPress={pickImage} />
+      )}
 
       {/* 画像が選択された場合は画像を表示 */}
-      {image && <Image source={{ uri: image }} style={{ width: 360, height: 240 }} />}
+      {image && (
+        <View style={styles.imageWrapper}>
+          <Image source={{ uri: image }} style={{ width: 360, height: 240 }} />
+          <TouchableOpacity style={styles.closeButton} onPress={removeImage}>
+            <Text style={styles.closeButtonText}>x</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
 
+    <View style={styles.date}>
+      <Text style={styles.dateText}>{year}年{month}月{day}日</Text>
     </View>
 
     <View style={styles.diaryText}>
@@ -139,18 +152,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff'
   },
-
+  imageWrapper: {
+    position: 'relative' // 相対位置を設定して×ボタンの位置を調整
+  },
   imageContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)',
     marginBottom: 16,
     width: 368,
     height: 223
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 20,
+    lineHeight: 20
   },
   monthTitle: {
     backgroundColor: '#BF5D5D',
     height: 51,
     width: 368,
-    marginBottom: 8,
+    marginBottom: 16,
     marginTop: 8,
     marginLeft: 17,
     marginRight: 17,
@@ -175,7 +208,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF6F6',
     marginRight: 17,
     marginLeft: 17,
-    height: 320
+    height: 320,
+    width: 368
   },
   diaryTextInput: {
     fontSize: 18,
