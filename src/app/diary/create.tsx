@@ -2,12 +2,16 @@ import {
   View, Text, TextInput, Image, Button, StyleSheet, KeyboardAvoidingView,
   TouchableOpacity
  } from 'react-native'
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { Entypo } from '@expo/vector-icons'
 import { collection, addDoc, Timestamp } from 'firebase/firestore'
 import { useState } from 'react'
 import { router } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
 import * as ImagePicker from 'expo-image-picker'
+import * as FileSystem from 'expo-file-system'
+import * as ImageManipulator from 'expo-image-manipulator'
+
 
 import CircleButton from '../../components/CircleButton'
 import { db, auth } from '../../config'
@@ -76,20 +80,132 @@ const Create = (): JSX.Element => {
     }
   }
 
-  const handlePress = (bodyText: string): void => {
+  const uploadFileToStorage = async (imageRef: any, binaryData: Uint8Array): Promise<string> => {
+
+    return await new Promise((resolve, reject) => {
+      const uploadTask = uploadBytesResumable(imageRef, binaryData)
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          console.log(`Upload is ${progress}% done`)
+          console.log("Bytes transferred:", snapshot.bytesTransferred)
+          console.log("Total bytes:", snapshot.totalBytes)
+          console.log("State:", snapshot.state)
+        },
+        (error) => {
+          console.error("アップロード中のエラー:", error)
+        },
+        async () => {
+          try {
+            const downloadUrl = await getDownloadURL(imageRef)
+            console.log("画像アップロード成功:", downloadUrl)
+            resolve(downloadUrl)
+          } catch (error) {
+            console.error("ダウンロードURL取得エラー:", error)
+            reject(error)
+          }
+        }
+      )
+    })
+  }
+
+  const uploadFileAsBlob = async (imageUri: string): Promise<string> => {
+    const storage = getStorage()
+    const userUid = auth.currentUser?.uid || "default_user"
+    const dateDirectory = "20240702" // サンプル値を使用
+    const fileName = `${Date.now()}.jpg`
+    const imageRef = ref(storage, `users/${userUid}/diary/${dateDirectory}/diaryimage/${fileName}`)
+
+    try {
+      // ローカルファイルを取得し、Blob に変換
+      const response = await fetch(imageUri)
+      const blob = await response.blob()
+      console.log("Blob 変換成功:", blob)
+
+      // Blob を使用してアップロード
+      const uploadTask = uploadBytesResumable(imageRef, blob)
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          console.log(`Upload is ${progress}% done`)
+        },
+        (error) => {
+          console.error("アップロード中のエラー:", error)
+        },
+        async () => {
+          try {
+            // アップロード完了後に URL を取得
+            const imageUrl = await getDownloadURL(imageRef)
+            console.log("画像アップロード成功:", imageUrl)
+            await addDoc(
+              collection(db, `users/${userUid}/diary/${dateDirectory}/diaryimage`),
+              {
+                imageUrl, // `undefined` ではないことを確認
+                updatedAt: Timestamp.fromDate(new Date())
+              }
+            )
+
+            console.log("画像URL Firestore 保存成功")
+          } catch (error) {
+          console.error("Firestore 保存エラー:", error)
+          }
+
+        }
+      )
+    } catch (error) {
+      console.error("Blob アップロードエラー:", error)
+      throw error
+    }
+  }
+
+  const resizeImage = async (imageUri: string): Promise<string> => {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [{ resize: { width: 400, height: 300 } }], // リサイズ指定
+      { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG } // 圧縮とフォーマット
+    )
+    return manipResult.uri
+  }
+
+  const handlePress = async (bodyText: string, imageUri: string | null): Promise<void> => {
     if (auth.currentUser === null) { return }
 
-    addDoc(collection(db, `users/${auth.currentUser.uid}/diary/${dateDirectory}/diarytext`), {
-      bodyText, // key doesn't need value if its name is same as key name
-      updatedAt: Timestamp.fromDate(new Date())
-    })
-      .then((docRef) => {
-        console.log('success', date, docRef.id)
-        router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
-      })
-      .catch((error) => {
+    const storage = getStorage()
+    const userUid = auth.currentUser.uid
+
+
+    try {
+      const docRef = await addDoc(
+        collection(db, `users/${userUid}/diary/${dateDirectory}/diarytext`),
+      {
+        bodyText,
+        updatedAt: Timestamp.fromDate(new Date())
+      }
+    )
+
+    console.log('success save text', docRef.id)
+
+    console.log("Image URI: ", imageUri)
+    if (imageUri) {
+      const imageRef = ref(storage, `users/${userUid}/diary/${dateDirectory}/diaryimage/${Date.now()}.jpg`)
+            // ローカルファイルの読み込み
+      console.log("Storage Reference Path:", imageRef.fullPath)
+      const compressedImageUri = await resizeImage(imageUri)
+      //console.log("バイナリデータ:", binaryData)
+      //const response = await fetch(imageUri)
+
+      await uploadFileAsBlob(compressedImageUri)
+
+        console.log("画像URL保存成功")
+      }
+      router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
+    } catch (error) {
         console.log(error)
-      })
+    }
   }
 
   const removeImage = () => {
@@ -138,7 +254,7 @@ const Create = (): JSX.Element => {
     </View>
 
     <CircleButton>
-        <Entypo name='check' onPress={() => {handlePress(bodyText)}} size={28}/>
+        <Entypo name='check' onPress={() => {handlePress(bodyText, image)}} size={28}/>
     </CircleButton>
 
   </KeyboardAvoidingView>
