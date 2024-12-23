@@ -141,6 +141,7 @@ const Edit = (): JSX.Element => {
         if (imageInfo) {
           console.log('image found')
           setImageId(imageInfo.imageId)
+          setImage(imageInfo.imageUrl)
           flagment[1] = 1
         } else {
           console.log('image not fount')
@@ -207,7 +208,12 @@ const Edit = (): JSX.Element => {
     </View>
 
       <View style={styles.diaryContent}>
-        <TextInput style={styles.diaryContentText} value={bodyText}/>
+        <TextInput
+          multiline
+          style={styles.diaryContentText}
+          value={bodyText}
+          onChangeText={(text) => { setBodyText(text) }}
+        />
       </View>
 
       <CircleButton>
