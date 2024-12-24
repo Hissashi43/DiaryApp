@@ -1,8 +1,8 @@
 import {
   View, Text, Image, TextInput, Button, TouchableOpacity,
-  StyleSheet, ActivityIndicator
+  StyleSheet, ActivityIndicator, ScrollView, Alert
 } from 'react-native'
-import { getStorage, ref} from 'firebase/storage'
+//import { getStorage, ref} from 'firebase/storage'
 import { Entypo } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
@@ -18,16 +18,43 @@ import DeleteImage from '../../components/DeleteImage'
 import UploadFileAsBlob from '../../components/UploadFileAsBlob'
 import ResizeImage from '../../components/ResizeImage'
 
+const confirmDelete = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "画像削除",
+      "前に保存していた画像はアプリから削除されます。よろしいですか？",
+      [
+        { text: "キャンセル", style: "cancel", onPress: () => resolve(false) },
+        { text: "削除", onPress: () => resolve(true) }
+      ]
+    )
+  })
+}
+
 const handlePress = async (
-  date: string, dateDirectory: string, bodyText: string, imageUri: string | null,
-  imageId: string | null): Promise<void> => {
+  date: string, dateDirectory: string, bodyText: string,
+  imageUri: string | null, imageId: string | null, changeImage: boolean
+): Promise<void> => {
   if (auth.currentUser === null) { return }
 
-  const storage = getStorage()
+  //const storage = getStorage()
   const userUid = auth.currentUser.uid
-  if (imageId) {
-    await DeleteImage(userUid, dateDirectory, imageId)
+  if (changeImage) {
+    const confirm = await confirmDelete()
+    if (confirm) {
+      try {
+        await DeleteImage(userUid, dateDirectory, imageId)
+        console.log("前の画像を削除しました")
+      } catch (error) {
+        console.error("画像削除エラー", error)
+        return
+      }
+    } else {
+      console.log("画像削除をキャンセルしました")
+      return
+    }
   }
+
   try {
     const docRef = await addDoc(
       collection(db, `users/${userUid}/diary/${dateDirectory}/diarytext`),
@@ -36,25 +63,21 @@ const handlePress = async (
         updatedAt: Timestamp.fromDate(new Date())
       }
     )
-
     console.log('success save text', docRef.id)
-    console.log("Image URI: ", imageUri)
-    if (imageUri) {
-      const imageRef = ref(storage, `users/${userUid}/diary/${dateDirectory}/diaryimage/${Date.now()}.jpg`)
-      console.log("Storage Reference Path:", imageRef.fullPath)
-      const compressedImageUri = await ResizeImage(imageUri)
-      //console.log("バイナリデータ:", binaryData)
-      //const response = await fetch(imageUri)
 
+    if (imageUri) {
+      //const imageRef = ref(storage, `users/${userUid}/diary/${dateDirectory}/diaryimage/${Date.now()}.jpg`)
+      //console.log("Storage Reference Path:", imageRef.fullPath)
+      const compressedImageUri = await ResizeImage(imageUri)
       await UploadFileAsBlob(dateDirectory, compressedImageUri)
       console.log("画像URL保存成功")
     }
+
     router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
     console.log('diary画面に遷移')
   } catch (error) {
       console.log('画像保存時のエラー: ', error)
   }
-
 }
 
 const Edit = (): JSX.Element => {
@@ -69,6 +92,7 @@ const Edit = (): JSX.Element => {
   const [image, setImage] = useState<string | null>(null)
   //const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [imageId, setImageId] = useState<string | null>(null)
+  const [changeImage, setChangeImage] = useState(false)
   const pickImage = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -99,6 +123,8 @@ const Edit = (): JSX.Element => {
   }
   const removeImage = () => {
     setImage(null)
+    const imageState = true
+    setChangeImage(imageState)
   }
 
   useEffect(() => {
@@ -207,18 +233,19 @@ const Edit = (): JSX.Element => {
       )}
     </View>
 
-      <View style={styles.diaryContent}>
+      <ScrollView style={styles.diaryContent}>
         <TextInput
           multiline
           style={styles.diaryContentText}
           value={bodyText}
           onChangeText={(text) => { setBodyText(text) }}
+          autoFocus
         />
-      </View>
+      </ScrollView>
 
       <CircleButton>
         <Entypo name='check' onPress={() => {
-          handlePress(date, dateDirectory, bodyText, image, imageId)}} size={28}
+          handlePress(date, dateDirectory, bodyText, image, imageId, changeImage)}} size={28}
         />
       </CircleButton>
 
@@ -290,13 +317,14 @@ const styles = StyleSheet.create({
     lineHeight: 20
   },
   diaryContent: {
-    alignItems: 'center',
+    //alignItems: 'center',
     marginRight: 17,
     marginLeft: 17
   },
   diaryContentText: {
     fontSize: 18,
-    lineHeight: 28
+    lineHeight: 28,
+    textAlign: 'left'
   }
 
 })

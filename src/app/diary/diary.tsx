@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native'
+import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
@@ -61,7 +61,6 @@ const Diary = (): JSX.Element => {
         if (!userUid) return
         const imageInfo = await FetchFirstImageId(userUid, dateDirectory)
 
-        // eslint-disable-next-line no-constant-binary-expression
         if (imageInfo) {
           setImage(imageInfo.imageUrl)
           console.log('image found', imageInfo.imageUrl)
@@ -133,11 +132,11 @@ const Diary = (): JSX.Element => {
         )}
       </View>
 
-      <View style={styles.diaryContent}>
+      <ScrollView style={styles.diaryContent}>
         <Text style={styles.diaryContentText}>
           { diaryData? `${diaryData.bodyText}` : '選択された日記はありません'}
         </Text>
-      </View>
+      </ScrollView>
 
       <CircleButton onPress={() => { handlePress(date, id) }}>
         <Entypo name='pencil' size={28}/>
@@ -195,13 +194,14 @@ const styles = StyleSheet.create({
     marginBottom: 8
   },
   diaryContent: {
-    alignItems: 'center',
+    //alignItems: 'center',
     marginRight: 17,
     marginLeft: 17
   },
   diaryContentText: {
     fontSize: 18,
-    lineHeight: 28
+    lineHeight: 28,
+    textAlign: 'left'
   }
 
 })
