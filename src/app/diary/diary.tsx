@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
 import { Entypo } from '@expo/vector-icons'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
 import { doc, getDoc } from 'firebase/firestore'
 import { db, auth } from '../../config'
@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import CircleButton from '../../components/CircleButton'
 import FetchFirstImageId from '../../components/FetchFirstImageId'
 import MonthColors from '../../components/MonthColors'
+import ToCalendarButton from '../../components/ToCalendarButton'
 
 const handlePress = (date: string, id: string): void => {
   router.push(`/diary/edit?date=${date}&id=${id}`)
@@ -24,6 +25,13 @@ const Diary = (): JSX.Element => {
   const [loading, setLoading] = useState(true)
   const currentBackgroundColor = MonthColors[month] || '#000000'
   const [image, setImage] = useState<string | null>(null)
+
+  const navigation = useNavigation()
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => { return <ToCalendarButton month={month} /> }
+    })
+  }, [])
 
 
   useEffect(() => {

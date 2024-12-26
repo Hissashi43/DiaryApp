@@ -1,6 +1,6 @@
 import {
   View, Text, Image, TextInput, Button, TouchableOpacity,
-  StyleSheet, ActivityIndicator, ScrollView, Alert
+  StyleSheet, ActivityIndicator, ScrollView, Alert, KeyboardAvoidingView
 } from 'react-native'
 //import { getStorage, ref} from 'firebase/storage'
 import { Entypo } from '@expo/vector-icons'
@@ -203,7 +203,7 @@ const Edit = (): JSX.Element => {
     ? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
     : 'unknown date'
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container}>
 
 
       <View style={[styles.monthTitle, { backgroundColor: currentBackgroundColor }]}>
@@ -249,7 +249,7 @@ const Edit = (): JSX.Element => {
         />
       </CircleButton>
 
-    </View>
+    </KeyboardAvoidingView>
 
   )
 }

@@ -6,6 +6,8 @@ import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../../config'
 import { useSearchParams } from 'expo-router/build/hooks'
 
+import MonthColors from '../../components/MonthColors'
+
 const handleDayPress = async (day: { dateString: string }) => {
   if (!auth.currentUser) {
     console.log('User us not logged in')
@@ -29,24 +31,10 @@ const handleDayPress = async (day: { dateString: string }) => {
 
 const monthlyCalendar = ():JSX.Element => {
   const searchParams = useSearchParams()
-  const month = searchParams.get('month')
+  const month = String(searchParams.get('month'))
   const [currentMonth, setCurrentMonth] = useState(month || new Date().getMonth() + 1)
-  const monthColors: { [key: string]: string } = {
-    '1': '#F65E5E', // 1月: 明るい赤
-    '2': '#5CA1DD', // 2月: 明るい青
-    '3': '#F893E2', // 3月: 明るいピンク
-    '4': '#64DA51', // 4月: 明るい緑
-    '5': '#67C09F', // 5月: 明るいシアン
-    '6': '#B47BDA', // 6月: 明るい紫
-    '7': '#49D1E1', // 7月: 明るい空色
-    '8': '#E58027', // 8月: 明るいオレンジ
-    '9': '#3DC02E', // 9月: 明るいライム
-    '10': '#E1C84A', // 10月: 明るい黄色
-    '11': '#BF5D5D', // 11月: 明るいローズ
-    '12': '#4F69BF' // 12月: 明るい青紫
-  }
-  const initColor = month && monthColors[month] ? monthColors[month] : '#FFFFFF'
-  const currentBackgroundColor = monthColors[currentMonth] || initColor
+  const initColor = month && MonthColors[month] ? MonthColors[month] : '#FFFFFF'
+  const currentBackgroundColor = MonthColors[currentMonth] || initColor
   return (
 
     <View style={styles.container}>
