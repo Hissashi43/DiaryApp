@@ -18,7 +18,7 @@ const ToCalendarButton = (props: Props): JSX.Element => {
   }
   return (
     <TouchableOpacity onPress={() => handlePress({month})}>
-      <Text style={styles.logOutText}>To Calendar</Text>
+      <Text style={styles.logOutText}>Calendar Page</Text>
     </TouchableOpacity>
   )
 }
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
   logOutText: {
     fontSize: 12,
     lineHeight: 24,
+    fontWeight: 'bold',
     color: 'rgba(255,255,255,0.7)'
   }
 })

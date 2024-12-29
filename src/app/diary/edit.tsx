@@ -17,6 +17,7 @@ import MonthColors from '../../components/MonthColors'
 import DeleteImage from '../../components/DeleteImage'
 import UploadFileAsBlob from '../../components/UploadFileAsBlob'
 import ResizeImage from '../../components/ResizeImage'
+import SaveDiaryEntry from '../../components/SaveDiaryEntry'
 
 const confirmDelete = (): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -72,7 +73,7 @@ const handlePress = async (
       await UploadFileAsBlob(dateDirectory, compressedImageUri)
       console.log("画像URL保存成功")
     }
-
+    await SaveDiaryEntry(date, bodyText, imageUri)
     router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
     console.log('diary画面に遷移')
   } catch (error) {
@@ -163,7 +164,6 @@ const Edit = (): JSX.Element => {
         if (!userUid) return
         const imageInfo = await FetchFirstImageId(userUid, dateDirectory)
 
-        // eslint-disable-next-line no-constant-binary-expression
         if (imageInfo) {
           console.log('image found')
           setImageId(imageInfo.imageId)
