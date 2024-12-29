@@ -12,7 +12,8 @@ const ToCalendarButton = (props: Props): JSX.Element => {
   const { month } = props
   const handlePress = (props: Props): void => {
     const { month } = props
-      router.replace(`/diary/calendar?month=${month}`)
+    console.log(`${month}月画面のカレンダーに遷移`)
+    router.replace(`/diary/calendar?month=${month}`)
 
   }
   return (

@@ -8,7 +8,7 @@ interface Props {
   onPress?: () => void
 }
 
-const CircleButton = (props: Props):JSX.Element => {
+const CirclePencilButton = (props: Props):JSX.Element => {
   const { children, style, onPress } = props
   return (
     <TouchableOpacity onPress={onPress} style={[styles.circleButton, style]}>
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default CircleButton
+export default CirclePencilButton

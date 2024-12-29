@@ -2,9 +2,9 @@ import {
   View, Text, TextInput, Image, Button, StyleSheet, KeyboardAvoidingView,
   TouchableOpacity
  } from 'react-native'
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { getStorage, ref } from 'firebase/storage'
 import { Entypo } from '@expo/vector-icons'
-import { collection, addDoc, Timestamp } from 'firebase/firestore'
+import { collection, addDoc, Timestamp, getFirestore, setDoc, doc } from 'firebase/firestore'
 import { useState } from 'react'
 import { router } from 'expo-router'
 import { useSearchParams } from 'expo-router/build/hooks'
@@ -33,6 +33,27 @@ import { db, auth } from '../../config'
       console.log(error)
     })
 }*/
+
+const saveDiaryEntry = async (date: string, text: string, imageUrl: string | null) => {
+  const userUid = auth.currentUser?.uid
+  const db = getFirestore() // Firestoreインスタンスを取得
+  const diaryDocRef = doc(db, `users/${userUid}/diary`, date) // ドキュメントの参照を取得
+
+  const data = {
+    date,
+    text: text || null, // 日記が空の場合はnull
+    imageUrl: imageUrl || null, // 写真がない場合はnull
+    hasDiary: !!text, // 日記がある場合はtrue
+    hasPhoto: !!imageUrl// 写真がある場合はtrue
+  }
+
+  try {
+    await setDoc(diaryDocRef, data, { merge: true }) // データをFirestoreに保存
+    console.log("Diary entry saved successfully!")
+  } catch (error) {
+    console.error("Error saving diary entry:", error)
+  }
+}
 
 const Create = (): JSX.Element => {
   const searchParams = useSearchParams()
@@ -97,6 +118,7 @@ const Create = (): JSX.Element => {
         await UploadFileAsBlob(dateDirectory, compressedImageUri)
         console.log("画像URL保存成功")
       }
+      await saveDiaryEntry(date, bodyText, imageUri)
       router.replace(`diary/diary?date=${date}&id=${docRef.id}`)
       console.log('diary画面に遷移')
     } catch (error) {

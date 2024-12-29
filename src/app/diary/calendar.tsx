@@ -1,12 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { router } from 'expo-router'
-import { collection, getDocs } from 'firebase/firestore'
+import { getFirestore, query, where, collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../../config'
 import { useSearchParams } from 'expo-router/build/hooks'
 
 import MonthColors from '../../components/MonthColors'
+import FetchMonthlyData from '../../components/FetchMonthlyData'
+
+type CustomStylesType = {
+  container?: {
+    borderWidth?: number
+    borderColor?: string
+    borderRadius?: number// 他のスタイルプロパティ
+  }
+}
 
 const handleDayPress = async (day: { dateString: string }) => {
   if (!auth.currentUser) {
@@ -21,6 +30,7 @@ const handleDayPress = async (day: { dateString: string }) => {
     const doc = querySnapshot.docs[0]
     const docId = doc.id
     console.log('Navigating to diary:', day.dateString)
+    console.log()
     router.push(`/diary/diary?date=${day.dateString}&id=${docId}`) // 修正: 動的なルートを指定
   } else {
     console.log('Navigating to create:', day.dateString)
@@ -32,9 +42,42 @@ const handleDayPress = async (day: { dateString: string }) => {
 const monthlyCalendar = ():JSX.Element => {
   const searchParams = useSearchParams()
   const month = String(searchParams.get('month'))
+  const year = '2024'
+  const yearMonth: string = year + '-' + month
+  const [monthlyData, setMonthlyData] = useState<Record<string, { hasDiary: boolean; hasPhoto: boolean }>>({})
   const [currentMonth, setCurrentMonth] = useState(month || new Date().getMonth() + 1)
+  const [currentYearMonth, setCurrentYearMonth] = useState(yearMonth)
   const initColor = month && MonthColors[month] ? MonthColors[month] : '#FFFFFF'
   const currentBackgroundColor = MonthColors[currentMonth] || initColor
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await FetchMonthlyData(currentYearMonth)
+      setMonthlyData(data)
+    }
+
+    fetchData()
+  }, [currentYearMonth])
+
+  const markedDates = Object.entries(monthlyData).reduce<Record<
+  string, { selected: boolean; selectedColor: string; customStyles?: CustomStylesType}>
+  >((acc, [date, flags]) => {
+    acc[date] = {
+      //marked: true, // 点を付ける
+      //dotColor: flags.hasPhoto ? "blue" : "transparent", // 写真がある場合は青い点
+      selected: flags.hasDiary, // 日記がある場合は選択状態
+      selectedColor: flags.hasDiary || flags.hasPhoto ? "lightgreen" : "transparent",
+      customStyles: flags.hasDiary && flags.hasPhoto ? {
+        container: {
+          borderWidth: 2,
+          borderColor: '#187D2B',
+          borderRadius: 15
+        }
+      }: {}// 日記がある場合は背景を緑に
+    }
+    return acc
+  }, {})
+
   return (
 
     <View style={styles.container}>
@@ -64,6 +107,8 @@ const monthlyCalendar = ():JSX.Element => {
             }}
             current={`2024-${currentMonth}-01`}
             style={styles.mCalendar}
+            markedDates={markedDates}
+            markingType={"custom"}
             onDayPress={handleDayPress} />
         </View>
       </SafeAreaView>
@@ -74,8 +119,7 @@ const monthlyCalendar = ():JSX.Element => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#ffffff'
+    flex: 1
   },
   imageContainer: {
     alignItems: 'center',
