@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { router } from 'expo-router'
-import { getFirestore, query, where, collection, getDocs } from 'firebase/firestore'
+import { collection, getDocs } from 'firebase/firestore'
 import { db, auth } from '../../config'
 import { useSearchParams } from 'expo-router/build/hooks'
 
@@ -42,10 +42,11 @@ const handleDayPress = async (day: { dateString: string }) => {
 const monthlyCalendar = ():JSX.Element => {
   const searchParams = useSearchParams()
   const month = String(searchParams.get('month'))
-  const year = '2024'
+  const year = String(searchParams.get('year'))
   const yearMonth: string = year + '-' + month
   const [monthlyData, setMonthlyData] = useState<Record<string, { hasDiary: boolean; hasPhoto: boolean }>>({})
   const [currentMonth, setCurrentMonth] = useState(month || new Date().getMonth() + 1)
+  const [currentYear, setCurrentYear] = useState(year || new Date().getFullYear())
   const [currentYearMonth, setCurrentYearMonth] = useState(yearMonth)
   const initColor = month && MonthColors[month] ? MonthColors[month] : '#FFFFFF'
   const currentBackgroundColor = MonthColors[currentMonth] || initColor
@@ -105,7 +106,7 @@ const monthlyCalendar = ():JSX.Element => {
               console.log('表示中の月: ', month)
               setCurrentMonth(month.month.toString()) // 月を2桁形式で保存)
             }}
-            current={`2024-${currentMonth}-01`}
+            current={`${currentYear}-${currentMonth}-01`}
             style={styles.mCalendar}
             markedDates={markedDates}
             markingType={"custom"}
