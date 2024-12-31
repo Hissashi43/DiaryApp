@@ -4,20 +4,20 @@ import { router } from "expo-router"
 
 interface Props {
   month: string
+  year: string
 }
 
 
 
 const ToCalendarButton = (props: Props): JSX.Element => {
-  const { month } = props
-  const handlePress = (props: Props): void => {
-    const { month } = props
-    console.log(`${month}月画面のカレンダーに遷移`)
-    router.replace(`/diary/calendar?month=${month}`)
+  const { month, year } = props
+  const handlePress = (): void => {
+    console.log(`${year}年${month}月画面のカレンダーに遷移`)
+    router.replace(`/diary/calendar?month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`)
 
   }
   return (
-    <TouchableOpacity onPress={() => handlePress({month})}>
+    <TouchableOpacity onPress={handlePress}>
       <Text style={styles.logOutText}>Calendar Page</Text>
     </TouchableOpacity>
   )
