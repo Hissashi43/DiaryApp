@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { View, Image, SafeAreaView, StyleSheet, Text } from 'react-native'
+import { View, Image, Button, TouchableOpacity, SafeAreaView, StyleSheet, Text } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { router } from 'expo-router'
 import { collection, getDocs } from 'firebase/firestore'
+import { getStorage, ref } from 'firebase/storage'
 import { db, auth } from '../../config'
 import { useSearchParams } from 'expo-router/build/hooks'
+import * as ImagePicker from 'expo-image-picker'
 
 import MonthColors from '../../components/MonthColors'
 import FetchMonthlyData from '../../components/FetchMonthlyData'
+import UploadCalendarImageAsBlob from '../../components/UploadCalendarImageAsBlob'
+import ResizeImage from '../../components/ResizeImage'
+import FetchCalendarImageId from '../../components/FetchCalendarImageId'
+//import FetchFirstImageId from '../../components/FetchFirstImageId'
 
 type CustomStylesType = {
   container?: {
@@ -50,13 +56,78 @@ const monthlyCalendar = ():JSX.Element => {
   const [currentYearMonth, setCurrentYearMonth] = useState(yearMonth)
   const initColor = month && MonthColors[month] ? MonthColors[month] : '#FFFFFF'
   const currentBackgroundColor = MonthColors[currentMonth] || initColor
+  const [image, setImage] = useState<string | null>(null)
+  const pickImage = async () => {
+    if (auth.currentUser === null) { return }
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      console.log('Permission result:', permissionResult)
+      if (!permissionResult.granted) {
+        alert('画像選択のためにカメラロールへのアクセス許可が必要です')
+        return
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 1
+      })
+
+      console.log('Image picker result:', result)
+
+      if (!result.canceled) {
+
+        const imageUri = result.assets[0].uri
+        const storage = getStorage()
+        const userUid = auth.currentUser.uid
+        //console.log('Selected image URI:', result.assets[0].uri)
+        setImage(imageUri)
+        if (imageUri) {
+          const imageRef = ref(storage, `users/${userUid}/calender/${yearMonth}/monthlyimage/${Date.now()}.jpg`)
+          console.log("Storage Reference Path:", imageRef.fullPath)
+          const compressedImageUri = await ResizeImage(imageUri)
+          //console.log("バイナリデータ:", binaryData)
+          //const response = await fetch(imageUri)
+
+          await UploadCalendarImageAsBlob(yearMonth, compressedImageUri)
+          console.log("画像URL保存成功")
+        } else {
+        //console.log('Image picker was canceled')
+        }
+      }
+    } catch (error) {
+      console.error('Error picking image:', error)
+    }
+  }
+
+  const removeImage = () => {
+    setImage(null)
+  }
 
   useEffect(() => {
+    if (auth.currentUser === null) { return }
+    const userUid = auth.currentUser.uid
     const fetchData = async () => {
       const data = await FetchMonthlyData(currentYearMonth)
       setMonthlyData(data)
     }
+    const fetchImageData = async () => {
+      try {
+        if (!userUid) return
+        const imageInfo = await FetchCalendarImageId(userUid, currentYearMonth)
 
+        if (imageInfo) {
+          setImage(imageInfo.imageUrl)
+          console.log('image found', imageInfo.imageUrl)
+        } else {
+          console.log('image not fount')
+        }
+      } catch (error) {
+        console.error('Error fetching diary image:', error)
+        setImage(null)
+      }
+    }
+    fetchImageData()
     fetchData()
   }, [currentYearMonth])
 
@@ -79,18 +150,49 @@ const monthlyCalendar = ():JSX.Element => {
     return acc
   }, {})
 
+  /*useEffect(() => {
+    if (auth.currentUser === null) { return }
+    const userUid = auth.currentUser.uid
+
+    const fetchImageData = async () => {
+      try {
+        if (!userUid) return
+        const imageInfo = await FetchCalendarImageId(userUid, yearMonth)
+
+        if (imageInfo) {
+          setImage(imageInfo.imageUrl)
+          console.log('image found', imageInfo.imageUrl)
+        } else {
+          console.log('image not fount')
+        }
+      } catch (error) {
+        console.error('Error fetching diary image:', error)
+        setImage(null)
+      }
+    }
+  fetchImageData()
+  }, [currentYearMonth])*/
+
+
   return (
 
     <View style={styles.container}>
 
       <View style={styles.imageContainer}>
-        <Image
-          style={{
-            width: 368,
-            height: 223
-          }}
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          source={require('../../../assets/example-image.png')} />
+        {/* 画像が選択されていない場合のみボタンを表示 */}
+        {!image && (
+        <Button title="カレンダー画像を選択する" onPress={pickImage} />
+        )}
+
+        {/* 画像が選択された場合は画像を表示 */}
+        {image && (
+          <View style={styles.imageWrapper}>
+            <Image source={{ uri: image }} style={{ width: 368, height: 240 }} />
+            <TouchableOpacity style={styles.closeButton} onPress={removeImage}>
+              <Text style={styles.closeButtonText}>x</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
 
       <View style={[styles.monthTitle, { backgroundColor: currentBackgroundColor }]}>
@@ -104,7 +206,9 @@ const monthlyCalendar = ():JSX.Element => {
           <Calendar
             onMonthChange={(month) => {
               console.log('表示中の月: ', month)
-              setCurrentMonth(month.month.toString()) // 月を2桁形式で保存)
+              const newYearMonth = `${month.year}-${month.month.toString().padStart(2, '0')}`
+              setCurrentMonth(month.month.toString())
+              setCurrentYearMonth(newYearMonth)
             }}
             current={`${currentYear}-${currentMonth}-01`}
             style={styles.mCalendar}
@@ -118,6 +222,7 @@ const monthlyCalendar = ():JSX.Element => {
   )
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1
@@ -126,14 +231,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 16
   },
+  imageWrapper: {
+    position: 'relative' // 相対位置を設定して×ボタンの位置を調整
+  },
   monthTitle: {
     height: 51,
-    width: 368,
+    width: '90%',
     marginBottom: 8,
     marginTop: 8,
     marginLeft: 17,
     marginRight: 17,
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    alignSelf: 'center'
   },
   monthText: {
     fontSize: 32,
@@ -144,6 +254,22 @@ const styles = StyleSheet.create({
   },
   calendarContainer: {
     flex: 1
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 20,
+    lineHeight: 20
   },
   centeredCalendar: {
     alignItems: 'center'

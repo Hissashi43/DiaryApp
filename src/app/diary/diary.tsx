@@ -29,7 +29,7 @@ const Diary = (): JSX.Element => {
   const navigation = useNavigation()
   useEffect(() => {
     navigation.setOptions({
-      headerLeft: () => { return <ToCalendarButton month={month} /> }
+      headerLeft: () => { return <ToCalendarButton month={month} year={year} /> }
     })
   }, [])
 
