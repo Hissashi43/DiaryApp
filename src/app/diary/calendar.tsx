@@ -121,6 +121,7 @@ const monthlyCalendar = ():JSX.Element => {
           console.log('image found', imageInfo.imageUrl)
         } else {
           console.log('image not fount')
+          setImage(null)
         }
       } catch (error) {
         console.error('Error fetching diary image:', error)
