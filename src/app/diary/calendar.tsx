@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Image, Button, TouchableOpacity, SafeAreaView, StyleSheet, Text } from 'react-native'
+import { View, Image, Button, TouchableOpacity, SafeAreaView, StyleSheet, Text, Alert } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import { router } from 'expo-router'
 import { collection, getDocs } from 'firebase/firestore'
@@ -13,15 +13,9 @@ import FetchMonthlyData from '../../components/FetchMonthlyData'
 import UploadCalendarImageAsBlob from '../../components/UploadCalendarImageAsBlob'
 import ResizeImage from '../../components/ResizeImage'
 import FetchCalendarImageId from '../../components/FetchCalendarImageId'
+import DeleteImage from '../../components/DeleteImage'
+import FetchFirstImageId from '../../components/FetchFirstImageId'
 //import FetchFirstImageId from '../../components/FetchFirstImageId'
-
-type CustomStylesType = {
-  container?: {
-    borderWidth?: number
-    borderColor?: string
-    borderRadius?: number// 他のスタイルプロパティ
-  }
-}
 
 const handleDayPress = async (day: { dateString: string }) => {
   if (!auth.currentUser) {
@@ -42,6 +36,19 @@ const handleDayPress = async (day: { dateString: string }) => {
     console.log('Navigating to create:', day.dateString)
     router.push(`/diary/create?date=${day.dateString}`)
   }
+}
+
+const confirmDelete = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    Alert.alert(
+      "画像削除",
+      "画像はアプリから削除されます。よろしいですか？",
+      [
+        { text: "キャンセル", style: "cancel", onPress: () => resolve(false) },
+        { text: "削除", onPress: () => resolve(true) }
+      ]
+    )
+  })
 }
 
 
@@ -100,10 +107,6 @@ const monthlyCalendar = ():JSX.Element => {
     }
   }
 
-  const removeImage = () => {
-    setImage(null)
-  }
-
   useEffect(() => {
     if (auth.currentUser === null) { return }
     const userUid = auth.currentUser.uid
@@ -132,6 +135,14 @@ const monthlyCalendar = ():JSX.Element => {
     fetchData()
   }, [currentYearMonth])
 
+  type CustomStylesType = {
+    container?: {
+      borderWidth?: number
+      borderColor?: string
+      borderRadius?: number// 他のスタイルプロパティ
+    }
+  }
+
   const markedDates = Object.entries(monthlyData).reduce<Record<
   string, { selected: boolean; selectedColor: string; customStyles?: CustomStylesType}>
   >((acc, [date, flags]) => {
@@ -151,29 +162,33 @@ const monthlyCalendar = ():JSX.Element => {
     return acc
   }, {})
 
-  /*useEffect(() => {
+  const handlePress = async (
+    currentYearMonth: string
+  ): Promise<void> => {
     if (auth.currentUser === null) { return }
+    //const storage = getStorage()
     const userUid = auth.currentUser.uid
-
-    const fetchImageData = async () => {
+    const confirm = await confirmDelete()
+    if (confirm) {
       try {
-        if (!userUid) return
-        const imageInfo = await FetchCalendarImageId(userUid, yearMonth)
-
+        const imageInfo = await FetchFirstImageId(userUid, currentYearMonth)
         if (imageInfo) {
-          setImage(imageInfo.imageUrl)
-          console.log('image found', imageInfo.imageUrl)
+          const fetchedImageId = imageInfo.imageId
+          await DeleteImage(userUid, currentYearMonth, fetchedImageId)
+          console.log("前の画像を削除しました")
+          setImage(null)
         } else {
-          console.log('image not fount')
+          setImage(null)
         }
       } catch (error) {
-        console.error('Error fetching diary image:', error)
-        setImage(null)
+        console.error("画像削除エラー", error)
+        return
       }
+    } else {
+      console.log("画像削除をキャンセルしました")
+      return
     }
-  fetchImageData()
-  }, [currentYearMonth])*/
-
+  }
 
   return (
 
@@ -189,7 +204,7 @@ const monthlyCalendar = ():JSX.Element => {
         {image && (
           <View style={styles.imageWrapper}>
             <Image source={{ uri: image }} style={{ width: 368, height: 240 }} />
-            <TouchableOpacity style={styles.closeButton} onPress={removeImage}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => {handlePress(currentYearMonth)}}>
               <Text style={styles.closeButtonText}>x</Text>
             </TouchableOpacity>
           </View>
@@ -240,8 +255,6 @@ const styles = StyleSheet.create({
     width: '90%',
     marginBottom: 8,
     marginTop: 8,
-    marginLeft: 17,
-    marginRight: 17,
     alignItems: 'center',
     paddingHorizontal: 16,
     alignSelf: 'center'

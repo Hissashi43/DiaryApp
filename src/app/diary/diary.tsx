@@ -179,12 +179,12 @@ const styles = StyleSheet.create({
   monthTitle: {
     backgroundColor: '#BF5D5D',
     height: 51,
-    width: 368,
+    width: '90%',
     marginBottom: 8,
     marginTop: 8,
-    marginLeft: 17,
-    marginRight: 17,
-    alignItems: 'center'
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    alignSelf: 'center'
   },
   monthText: {
     fontSize: 32,
