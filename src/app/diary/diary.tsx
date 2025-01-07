@@ -10,6 +10,7 @@ import CircleButton from '../../components/CircleButton'
 import FetchFirstImageId from '../../components/FetchFirstImageId'
 import MonthColors from '../../components/MonthColors'
 import ToCalendarButton from '../../components/ToCalendarButton'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const handlePress = (date: string, id: string): void => {
   router.push(`/diary/edit?date=${date}&id=${id}`)
@@ -107,7 +108,7 @@ const Diary = (): JSX.Element => {
     ? new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
     : 'unknown date'
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
 
 
       <View style={[styles.monthTitle, { backgroundColor: currentBackgroundColor }]}>
@@ -140,7 +141,7 @@ const Diary = (): JSX.Element => {
         )}
       </View>
 
-      <ScrollView style={styles.diaryContent}>
+      <ScrollView style={styles.diaryContent} contentContainerStyle={{ paddingBottom: 80 }}>
         <Text style={styles.diaryContentText}>
           { diaryData? `${diaryData.bodyText}` : '選択された日記はありません'}
         </Text>
@@ -150,7 +151,7 @@ const Diary = (): JSX.Element => {
         <Entypo name='pencil' size={28}/>
       </CircleButton>
 
-    </View>
+    </SafeAreaView>
 
   )
 }

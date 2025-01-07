@@ -2,7 +2,7 @@ import { getFirestore, collection, query, where, getDocs } from "firebase/firest
 
 import { auth } from "../config"
 
-const FetchMonthlyData = async (month: string) => {
+const FetchMonthlyData = async (yearMonth: string) => {
   const userUid = auth.currentUser?.uid // 現在のユーザーUIDを取得
   if (!userUid) {
     console.error("User not authenticated")
@@ -13,8 +13,8 @@ const FetchMonthlyData = async (month: string) => {
   const diaryCollectionRef = collection(db, `users/${userUid}/diary`) // ユーザーのdiaryコレクションを参照
 
   // 月の範囲を定義（例: 2024-12なら2024-12-01～2024-12-31）
-  const startDate = `${month}-01` // 例: "2024-12-01"
-  const endDate = `${month}-31`   // 例: "2024-12-31"
+  const startDate = `${yearMonth}-01` // 例: "2024-12-01"
+  const endDate = `${yearMonth}-31`   // 例: "2024-12-31"
 
   try {
     // Firestoreからその月のデータをクエリ

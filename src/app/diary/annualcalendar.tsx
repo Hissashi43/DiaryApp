@@ -38,39 +38,39 @@ const annualCalendar = (): JSX.Element => {
       </View>
       <View style={styles.monthButtons}>
         <View style={styles.JanuaryButton}>
-          <RectangularButton onPress={() => handlePress(year, '1')}backgroundColor='#F65E5E'>1月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '01')}backgroundColor='#F65E5E'>1月</RectangularButton>
         </View>
 
         <View style={styles.FebruaryButton}>
-          <RectangularButton onPress={() => handlePress(year, '2')}  backgroundColor='#5CA1DD'>2月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '02')}  backgroundColor='#5CA1DD'>2月</RectangularButton>
         </View>
 
         <View style={styles.MarchButton}>
-          <RectangularButton onPress={() => handlePress(year, '3')}  backgroundColor='#F893E2'>3月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '03')}  backgroundColor='#F893E2'>3月</RectangularButton>
         </View>
 
         <View style={styles.AprilButton}>
-          <RectangularButton onPress={() => handlePress(year, '4')}  backgroundColor='#64DA51'>4月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '04')}  backgroundColor='#64DA51'>4月</RectangularButton>
         </View>
 
         <View style={styles.MayButton}>
-          <RectangularButton onPress={() => handlePress(year, '5')}  backgroundColor='#67C09F'>5月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '05')}  backgroundColor='#67C09F'>5月</RectangularButton>
         </View>
 
         <View style={styles.JuneButton}>
-          <RectangularButton onPress={() => handlePress(year, '6')}  backgroundColor='#B47BDA'>6月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '06')}  backgroundColor='#B47BDA'>6月</RectangularButton>
         </View>
 
         <View style={styles.JulyButton}>
-          <RectangularButton onPress={() => handlePress(year, '7')}  backgroundColor='#49D1E1'>7月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '07')}  backgroundColor='#49D1E1'>7月</RectangularButton>
         </View>
 
         <View style={styles.AugustButton}>
-          <RectangularButton onPress={() => handlePress(year, '8')}  backgroundColor='#E58027'>8月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '08')}  backgroundColor='#E58027'>8月</RectangularButton>
         </View>
 
         <View style={styles.SeptemberButton}>
-          <RectangularButton onPress={() => handlePress(year, '9')}  backgroundColor='#3DC02E'>9月</RectangularButton>
+          <RectangularButton onPress={() => handlePress(year, '09')}  backgroundColor='#3DC02E'>9月</RectangularButton>
         </View>
 
         <View style={styles.OctoberButton}>

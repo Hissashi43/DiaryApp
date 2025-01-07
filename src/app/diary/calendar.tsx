@@ -113,6 +113,7 @@ const monthlyCalendar = ():JSX.Element => {
     const fetchData = async () => {
       const data = await FetchMonthlyData(currentYearMonth)
       setMonthlyData(data)
+      console.log(`対象月: ${currentYearMonth}`)
     }
     const fetchImageData = async () => {
       try {
