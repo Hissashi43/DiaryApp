@@ -10,18 +10,22 @@ import { signInWithEmailAndPassword } from 'firebase/auth'
 import Button from '../../components/Button'
 import { auth } from '../../config'
 
-const handlePress = (email: string, password: string): void => {
+const handlePress = async (email: string, password: string): Promise<void> => {
   // ログイン
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      console.log(userCredential.user.uid)
-      router.replace('/diary/annualcalendar')
-    })
-    .catch((error) => {
-      const { code, message } = error
+  try {
+    const useCredential = await signInWithEmailAndPassword(auth, email, password)
+    const user = useCredential.user
+    if (!user.emailVerified) {
+      Alert.alert('Eメールが有効化されていません。Eメールを有効化してください')
+      return
+    }
+
+    router.replace('/diary/annualcalendar')
+  } catch (error) {
+      const { code, message } = error as { code: string, message: string }
       console.log(code, message)
-      Alert.alert(message)
-    })
+      Alert.alert('Error', message)
+    }
 }
 
 const LogIn = (): JSX.Element => {

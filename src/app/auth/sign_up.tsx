@@ -5,24 +5,31 @@ import {
 
 import { Link, router } from 'expo-router'
 import { useState } from 'react'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth'
 
 import Button from '../../components/Button'
 import { auth } from '../../config'
 
-const handlePress = (email: string, password: string): void => {
+const handlePress = async (email: string, password: string): Promise<void> => {
   // 会員登録
-  console.log(email, password)
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      console.log(userCredential.user.uid)
-      router.replace('/diary/annualcalendar')
-    })
-    .catch((error) => {
-      const { code, message } = error
+  try {
+    console.log(email, password)
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    const user = userCredential.user
+
+    await sendEmailVerification(user)
+
+    Alert.alert(
+      'Eメールを送りました',
+      'メールを確認してEメールアドレスを有効化してください'
+    )
+
+    router.replace('/auth/log_in')
+  } catch (error) {
+      const { code, message } = error as { code: string; message: string}
       console.log(code, message)
       Alert.alert(message)
-    })
+    }
 }
 
 
