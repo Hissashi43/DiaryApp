@@ -25,10 +25,10 @@ const styles = StyleSheet.create({
   RectangularButton: {
     width: 160,
     height: 72,
-    borderRadius: 5,
+    borderRadius: 12,
     backgroundColor: '#BF5D5D',
     shadowColor: '#000000',
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.1,
     shadowRadius: 8,
     shadowOffset: {width: 0, height: 8},
     elevation: 8

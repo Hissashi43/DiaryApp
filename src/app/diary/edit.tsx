@@ -44,7 +44,8 @@ const handlePress = async (
     const confirm = await confirmDelete()
     if (confirm) {
       try {
-        await DeleteImage(userUid, dateDirectory, imageId)
+        const flag = false
+        await DeleteImage(userUid, dateDirectory, imageId, flag)
         console.log("前の画像を削除しました")
       } catch (error) {
         console.error("画像削除エラー", error)

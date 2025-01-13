@@ -31,9 +31,9 @@ const annualCalendar = (): JSX.Element => {
 
 
       <View style={styles.year}>
-        <CustomButton title="<" onPress={() => changeYear(-1)} backgroundColor='#ffffff'/>
+        <CustomButton title="<" onPress={() => changeYear(-1)} backgroundColor='#ffffff' color='#8F8F8F' />
         <Text style={styles.yearText}>{year}</Text>
-        <CustomButton title=">" onPress={() => changeYear(1)} backgroundColor='#ffffff'/>
+        <CustomButton title=">" onPress={() => changeYear(1)} backgroundColor='#ffffff' color='#8F8F8F'/>
 
       </View>
       <View style={styles.monthButtons}>
@@ -105,8 +105,9 @@ const styles = StyleSheet.create({
     marginTop: 8
   },
   yearText: {
-    fontSize: 32,
+    fontSize: 36,
     marginBottom: 2,
+    fontWeight: 'bold',
     color: '#000000'
   },
   Button: {

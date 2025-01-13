@@ -14,7 +14,7 @@ import UploadCalendarImageAsBlob from '../../components/UploadCalendarImageAsBlo
 import ResizeImage from '../../components/ResizeImage'
 import FetchCalendarImageId from '../../components/FetchCalendarImageId'
 import DeleteImage from '../../components/DeleteImage'
-import FetchFirstImageId from '../../components/FetchFirstImageId'
+//import FetchFirstImageId from '../../components/FetchFirstImageId'
 //import FetchFirstImageId from '../../components/FetchFirstImageId'
 
 const handleDayPress = async (day: { dateString: string }) => {
@@ -172,10 +172,11 @@ const monthlyCalendar = ():JSX.Element => {
     const confirm = await confirmDelete()
     if (confirm) {
       try {
-        const imageInfo = await FetchFirstImageId(userUid, currentYearMonth)
+        const imageInfo = await FetchCalendarImageId(userUid, currentYearMonth)
         if (imageInfo) {
           const fetchedImageId = imageInfo.imageId
-          await DeleteImage(userUid, currentYearMonth, fetchedImageId)
+          const flag = true
+          await DeleteImage(userUid, currentYearMonth, fetchedImageId, flag)
           console.log("前の画像を削除しました")
           setImage(null)
         } else {
@@ -203,12 +204,9 @@ const monthlyCalendar = ():JSX.Element => {
 
         {/* 画像が選択された場合は画像を表示 */}
         {image && (
-          <View style={styles.imageWrapper}>
+          <TouchableOpacity style={styles.imageWrapper} onPress={() => {handlePress(currentYearMonth)}}>
             <Image source={{ uri: image }} style={{ width: 368, height: 240 }} />
-            <TouchableOpacity style={styles.closeButton} onPress={() => {handlePress(currentYearMonth)}}>
-              <Text style={styles.closeButtonText}>x</Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
       </View>
 
