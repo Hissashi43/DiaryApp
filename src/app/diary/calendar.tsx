@@ -58,6 +58,7 @@ const monthlyCalendar = ():JSX.Element => {
   const year = String(searchParams.get('year'))
   const yearMonth: string = year + '-' + month
   const [monthlyData, setMonthlyData] = useState<Record<string, { hasDiary: boolean; hasPhoto: boolean }>>({})
+  const [diaryCount, setDiaryCount] = useState(0)
   const [currentMonth, setCurrentMonth] = useState(month || new Date().getMonth() + 1)
   const [currentYear, setCurrentYear] = useState(year || new Date().getFullYear())
   const [currentYearMonth, setCurrentYearMonth] = useState(yearMonth)
@@ -107,12 +108,22 @@ const monthlyCalendar = ():JSX.Element => {
     }
   }
 
+  const daysInMonth = new Date(Number(currentYear), Number(currentMonth), 0).getDate()
+  const getCountContainerStyle = () => {
+    if (diaryCount >= daysInMonth) return [styles.countContainer, styles.countComplete]
+    if (diaryCount >= daysInMonth / 2) return [styles.countContainer, styles.countHalf]
+    if (diaryCount >= 5) return [styles.countContainer, styles.countFive]
+    return styles.countContainer
+  }
+
   useEffect(() => {
     if (auth.currentUser === null) { return }
     const userUid = auth.currentUser.uid
     const fetchData = async () => {
       const data = await FetchMonthlyData(currentYearMonth)
       setMonthlyData(data)
+      const count = Object.values(data).filter((d) => d.hasDiary).length
+      setDiaryCount(count)
       console.log(`対象月: ${currentYearMonth}`)
     }
     const fetchImageData = async () => {
@@ -216,6 +227,13 @@ const monthlyCalendar = ():JSX.Element => {
         </Text>
       </View>
 
+      <View style={getCountContainerStyle()}>
+        <Text style={styles.countText}>日記数: {diaryCount}</Text>
+        {diaryCount >= daysInMonth && (
+          <Text style={styles.completeText}>コンプリート!</Text>
+        )}
+      </View>
+
       <SafeAreaView style={styles.calendarContainer}>
         <View style={styles.centeredCalendar}>
           <Calendar
@@ -290,6 +308,36 @@ const styles = StyleSheet.create({
   mCalendar: {
     width: 368,
     height: 320
+  },
+  countContainer: {
+    alignItems: 'center',
+    marginTop: 4,
+    marginBottom: 8,
+    padding: 4,
+    borderRadius: 8
+  },
+  countFive: {
+    backgroundColor: '#E8F5E9',
+    borderWidth: 2,
+    borderColor: '#66BB6A'
+  },
+  countHalf: {
+    backgroundColor: '#FFFDE7',
+    borderWidth: 2,
+    borderColor: '#FFB300'
+  },
+  countComplete: {
+    backgroundColor: '#FFF3E0',
+    borderWidth: 2,
+    borderColor: '#FFD700'
+  },
+  countText: {
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  completeText: {
+    fontSize: 14,
+    color: '#FF8F00'
   }
 })
 
