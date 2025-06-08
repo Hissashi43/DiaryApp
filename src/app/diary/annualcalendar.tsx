@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import RectangularButton from '../../components/RectangularButton'
 import LogOutButton from '../../components/LogOutButton'
 import CustomButton from '../../components/CustomButton'
+import FetchYearlyCount from '../../components/FetchYearlyCount'
 /*import CircleButton from '../../components/CircleButton'*/
 
 const handlePress = (year: string, month: string): void => {
@@ -14,13 +15,32 @@ const handlePress = (year: string, month: string): void => {
 const annualCalendar = (): JSX.Element => {
   const currentYear = String(new Date().getFullYear())
   const[year, setYear] = useState(currentYear)
+  const [yearlyCount, setYearlyCount] = useState(0)
   const navigation = useNavigation()
+  const daysInYear = new Date(Number(year), 12, 0).getDate()
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => { return <LogOutButton /> }
     })
   }, [])
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const count = await FetchYearlyCount(year)
+      setYearlyCount(count)
+    }
+    fetchCount()
+  }, [year])
+
+  const getCountContainerStyle = () => {
+    if (yearlyCount >= daysInYear) return [styles.countContainer, styles.yearComplete]
+    if (yearlyCount >= 300) return [styles.countContainer, styles.year300]
+    if (yearlyCount >= daysInYear / 2) return [styles.countContainer, styles.yearHalf]
+    if (yearlyCount >= 60) return [styles.countContainer, styles.year60]
+    if (yearlyCount >= 30) return [styles.countContainer, styles.year30]
+    return styles.countContainer
+  }
 
   const changeYear = (offset: number): void => {
     setYear((prevYear) => String(Number(prevYear) + offset))
@@ -35,6 +55,12 @@ const annualCalendar = (): JSX.Element => {
         <Text style={styles.yearText}>{year}</Text>
         <CustomButton title=">" onPress={() => changeYear(1)} backgroundColor='#ffffff' color='#8F8F8F'/>
 
+      </View>
+      <View style={getCountContainerStyle()}>
+        <Text style={styles.countText}>年間日記数: {yearlyCount}</Text>
+        {yearlyCount >= daysInYear && (
+          <Text style={styles.completeText}>コンプリート!</Text>
+        )}
       </View>
       <View style={styles.monthButtons}>
         <View style={styles.JanuaryButton}>
@@ -178,11 +204,58 @@ const styles = StyleSheet.create({
   left: 16,
   top: 448
  },
- DecemberButton: {
-  position: 'absolute',
-  left: 192,
-  top: 448
- }
+  DecemberButton: {
+    position: 'absolute',
+    left: 192,
+    top: 448
+  },
+  countContainer: {
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  year30: {
+    backgroundColor: '#E8F5E9',
+    borderWidth: 2,
+    borderColor: '#66BB6A',
+    borderRadius: 8,
+    padding: 4
+  },
+  year60: {
+    backgroundColor: '#E1F5FE',
+    borderWidth: 2,
+    borderColor: '#42A5F5',
+    borderRadius: 8,
+    padding: 4
+  },
+  yearHalf: {
+    backgroundColor: '#FFFDE7',
+    borderWidth: 2,
+    borderColor: '#FFB300',
+    borderRadius: 8,
+    padding: 4
+  },
+  year300: {
+    backgroundColor: '#FFF3E0',
+    borderWidth: 2,
+    borderColor: '#FF9800',
+    borderRadius: 8,
+    padding: 4
+  },
+  yearComplete: {
+    backgroundColor: '#F3E5F5',
+    borderWidth: 2,
+    borderColor: '#BA68C8',
+    borderRadius: 8,
+    padding: 4
+  },
+  countText: {
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  completeText: {
+    fontSize: 14,
+    color: '#BA68C8'
+  }
 })
 
 export default annualCalendar
